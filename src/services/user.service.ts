@@ -91,9 +91,8 @@ export class UserService {
                 UPDATE users
                 SET "firstName" = $1, "lastName" = $2, "documentType" = $3,
                 "documentNumber" = $4, "phoneNumber" = $5, "defaultAddress" = $6,
-                "isActive" = $7, "emailVerified" = $8, "lastLogin" = $9,
-                "updatedAt" = $10, "email" = $11, "role" = $12
-                WHERE id = $13
+                "updatedAt" = $7, "email" = $8, "role" = $9
+                WHERE id = $10
                 RETURNING *
                 `, [
                 userData.firstName,
@@ -102,9 +101,6 @@ export class UserService {
                 userData.documentNumber,
                 userData.phoneNumber,
                 userData.defaultAddress,
-                userData.isActive,
-                userData.emailVerified,
-                userData.lastLogin,
                 userData.updatedAt,
                 userData.email,
                 userData.role,
@@ -136,12 +132,66 @@ export class UserService {
             if (result.rowCount === 0) {
                 return undefined;
             }
-
+            delete result.rows[0].password
             return result.rows[0];
         } catch (error) {
             console.error(`Error al actualizar estado de activación del usuario ${id}:`, error);
             throw error;
         }
+    }
+
+    async updateUserEmailVerifiedStatus(id: string, emailVerified: boolean, updatedAt: Date): Promise<User | undefined> {
+
+        try {
+
+            const result = await pool.query(`
+        UPDATE users
+        SET "emailVerified" = $1, "updatedAt" = $2
+        WHERE id = $3
+        RETURNING *
+        `, [emailVerified, updatedAt, id]);
+
+            if (result.rowCount === 0) {
+                return undefined;
+            }
+
+            delete result.rows[0].password
+            return result.rows[0];
+
+        } catch (error) {
+
+            console.error(`Error al actualizar estado de verificación de email del usuario ${id}:`, error);
+            throw error;
+
+        }
+
+    }
+
+    async updateUserRoleStatus(id: string, role: UserRole, updatedAt: Date): Promise<User | undefined> {
+
+        try {
+
+            const result = await pool.query(`
+        UPDATE users
+        SET "role" = $1, "updatedAt" = $2
+        WHERE id = $3
+        RETURNING *
+        `, [role, updatedAt, id]);
+
+            if (result.rowCount === 0) {
+                return undefined;
+            }
+
+            delete result.rows[0].password
+            return result.rows[0];
+
+        } catch (error) {
+
+            console.error(`Error al actualizar estado de verificación de email del usuario ${id}:`, error);
+            throw error;
+
+        }
+
     }
 
     async verifyUserEmail(id: string, updatedAt: Date): Promise<User | undefined> {
@@ -156,7 +206,7 @@ export class UserService {
             if (result.rowCount === 0) {
                 return undefined;
             }
-
+            delete result.rows[0].password
             return result.rows[0];
         } catch (error) {
             console.error(`Error al verificar email del usuario ${id}:`, error);
@@ -176,7 +226,7 @@ export class UserService {
             if (result.rowCount === 0) {
                 return undefined;
             }
-
+            delete result.rows[0].password
             return result.rows[0];
         } catch (error) {
             console.error(`Error al actualizar último login del usuario ${id}:`, error);
@@ -190,7 +240,7 @@ export class UserService {
         DELETE FROM users
         WHERE id = $1
       `, [id]);
-
+            delete result.rows[0].password
             return (result.rowCount ?? 0) > 0;
         } catch (error) {
             console.error(`Error al eliminar usuario ${id}:`, error);
