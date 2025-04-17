@@ -3,7 +3,6 @@ import { OrderStatus } from '../utils/enums';
 import OrderController from '../controllers/order.controller';
 
 const router = Router();
-
 // Obtener todas las órdenes
 router.get('/', OrderController.getOrders);
 router.get('/:id', OrderController.getOrderById);

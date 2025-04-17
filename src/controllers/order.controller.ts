@@ -1,43 +1,111 @@
 import { Request, Response } from "express";
-import pool from "../config/database";
+import orderService from "../services/order.service";
+import { OrderStatus } from "../utils/enums";
+import Order from "../models/Order";
 
 export class OrderController {
 
     async getOrders(req: Request, res: Response) {
-
-        console.log("Obteniendo todas las órdenes");
         try {
-
-            const data = await pool.query("SELECT * FROM orders");
-            res.status(200).json(data);
-
+            const orders = await orderService.getOrders();
+            res.status(200).json(orders);
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: "Error al obtener las órdenes" });
         }
-
     }
 
-    async getOrderById(req: Request, res: Response) {
+    async getOrderById(req: Request, res: Response): Promise<void> {
+        try {
+            const { id } = req.params;
+            const order = await orderService.getOrderById(id);
 
+            if (!order) {
+                res.status(404).json({ message: "Orden no encontrada" });
+                return
+            }
+
+            res.status(200).json(order);
+            return
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: "Error al obtener la orden" });
+            return
+        }
     }
 
+    async createOrder(req: Request, res: Response): Promise<void> {
+        try {
+            const orderData = req.body as Order;
+            if (!orderData) {
+                res.status(400).json({ message: "Faltan datos requeridos para crear la orden" });
+                return
+            }
 
-    async createOrder(req: Request, res: Response) {
+            if (!orderData.userId || !orderData.origin || !orderData.destination || !orderData.dimensions) {
+                res.status(400).json({ message: "Faltan datos requeridos para crear la orden" });
+                return
+            }
 
+            const newOrder = await orderService.createOrder(orderData);
+            res.status(201).json(newOrder);
+            return
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: "Error al crear la orden" });
+        }
     }
 
+    async updateOrderStatus(req: Request, res: Response): Promise<void> {
+        try {
+            const { id } = req.params;
+            const { orderStatus } = req.body;
 
-    async updateOrderStatus(req: Request, res: Response) {
+            if (!orderStatus || !Object.values(OrderStatus).includes(orderStatus)) {
+                res.status(400).json({ message: "Estado de orden inválido" });
+                return
+            }
 
+            const updatedOrder = await orderService.updateOrderStatus(id, orderStatus);
+
+            if (!updatedOrder) {
+                res.status(404).json({ message: "Orden no encontrada" });
+                return
+            }
+
+            res.status(200).json(updatedOrder);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: "Error al actualizar el estado de la orden" });
+        }
     }
 
-    async deleteOrder(req: Request, res: Response) {
+    async deleteOrder(req: Request, res: Response): Promise<void> {
+        try {
+            const { id } = req.params;
+            const deleted = await orderService.deleteOrder(id);
 
+            if (!deleted) {
+                res.status(404).json({ message: "Orden no encontrada" });
+                return
+            }
+
+            res.status(204).send();
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: "Error al eliminar la orden" });
+        }
     }
 
-    async getOrdersByUserId(req: Request, res: Response) {
-
+    async getOrdersByUserId(req: Request, res: Response): Promise<void> {
+        try {
+            const { userId } = req.params;
+            const orders = await orderService.getOrdersByUserId(userId);
+            res.status(200).json(orders);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: "Error al obtener las órdenes del usuario" });
+        }
     }
 }
 
