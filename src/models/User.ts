@@ -14,7 +14,6 @@ interface User {
   defaultAddress?: {
     address: string;
     city: string;
-    state: string;
     country: string;
     postalCode: string;
   };

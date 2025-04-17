@@ -8,9 +8,7 @@ const pool = new Pool({
   port: parseInt(process.env.POSTGRES_PORT || '5432'),
 });
 
-console.log('Database connection established');
-console.log(`User: ${process.env.POSTGRES_USER}`);
-console.log(`Host: ${process.env.POSTGRES_HOST}`);
-console.log(`Database: ${process.env.POSTGRES_DB}`);
+console.log('Database connected');
+console.log(`HOST: ${process.env.POSTGRES_HOST}`);
 
 export default pool;
