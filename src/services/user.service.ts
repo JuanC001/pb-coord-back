@@ -64,15 +64,17 @@ export class UserService {
                 userData.lastName,
                 userData.documentType,
                 userData.documentNumber,
+                userData.phoneNumber,
                 userData.role,
                 userData.defaultAddress,
                 userData.isActive,
                 userData.emailVerified,
                 userData.lastLogin,
                 userData.createdAt,
-                userData.updatedAt,
-                userData.phoneNumber
+                userData.updatedAt
             ]);
+
+            delete result.rows[0].password
 
             return result.rows[0];
         } catch (error) {
@@ -84,7 +86,38 @@ export class UserService {
 
     async updateUser(id: string, userData: User): Promise<User | undefined> {
         try {
-            return
+
+            const result = await pool.query(`
+                UPDATE users
+                SET "firstName" = $1, "lastName" = $2, "documentType" = $3,
+                "documentNumber" = $4, "phoneNumber" = $5, "defaultAddress" = $6,
+                "isActive" = $7, "emailVerified" = $8, "lastLogin" = $9,
+                "updatedAt" = $10, "email" = $11, "role" = $12
+                WHERE id = $13
+                RETURNING *
+                `, [
+                userData.firstName,
+                userData.lastName,
+                userData.documentType,
+                userData.documentNumber,
+                userData.phoneNumber,
+                userData.defaultAddress,
+                userData.isActive,
+                userData.emailVerified,
+                userData.lastLogin,
+                userData.updatedAt,
+                userData.email,
+                userData.role,
+                id
+            ])
+
+            if (result.rowCount === 0) {
+                return undefined;
+            }
+
+            delete result.rows[0].password
+            return result.rows[0];
+
         } catch (error) {
             console.error(`Error al actualizar usuario ${id}:`, error);
             throw error;
