@@ -146,5 +146,4 @@ export class OrderService {
     }
 }
 
-// Exportamos una instancia única del servicio para ser utilizada en toda la aplicación
 export default new OrderService();
