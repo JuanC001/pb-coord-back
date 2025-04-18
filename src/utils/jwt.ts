@@ -19,16 +19,23 @@ export const generateJWT = async (uid: string, email: string, role: UserRole) =>
 
 }
 
-export const validateJWT = (token: string) => {
+export interface JWTPayload {
+    uid: string;
+    email: string;
+    role: UserRole;
+}
+
+export const validateJWT = (token: string): { valid: boolean; payload?: JWTPayload } => {
     try {
-        const { uid, email, role } = verify(token, SECRET_KEY_JWT as string) as {
-            uid: string;
-            email: string;
-            role: UserRole;
+        const payload = verify(token, SECRET_KEY_JWT as string) as JWTPayload;
+        return {
+            valid: true,
+            payload
         };
-        return true
     } catch (error) {
-        console.error(error)
-        return false;
+        console.error('JWT validation error:', error);
+        return {
+            valid: false
+        };
     }
 }

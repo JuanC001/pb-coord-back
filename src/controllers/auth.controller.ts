@@ -90,9 +90,13 @@ export class AuthController {
 
     async renewToken(req: Request, res: Response): Promise<void> {
         try {
-            const { uid, email, role } = req.body;
+            // Usando la información del usuario proporcionada por el middleware validateToken
+            const { uid, email, role } = req.user!;
+            
+            // Generar un nuevo token con la misma información
             const token = await generateJWT(uid, email, role);
 
+            // Enviar el nuevo token junto con la información del usuario
             res.status(200).json({
                 uid,
                 email,
