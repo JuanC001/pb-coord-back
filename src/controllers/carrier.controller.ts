@@ -125,6 +125,11 @@ export class CarrierController {
                     res.status(400).json({ message: "La ruta especificada no existe" });
                     return;
                 }
+
+                if (error.code === '22P02') {
+                    res.status(400).json({ message: "El ID del transportista o la ruta no es válida" });
+                    return;
+                }
             }
             res.status(500).json({ message: "Error al actualizar el transportista" });
         }

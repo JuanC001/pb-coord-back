@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Carrier } from "../models/Carrier";
 import pool from "../config/database";
+import { DatabaseError } from 'pg';
 
 export class CarrierService {
 
@@ -54,9 +55,9 @@ export class CarrierService {
     async updateCarrier(id: string, carrierData: Partial<Carrier>): Promise<Carrier | undefined> {
         try {
             const now = new Date();
-            
+
             const existingCarrier = await this.getCarrierById(id);
-            
+
             if (!existingCarrier) {
                 return undefined;
             }
@@ -67,15 +68,16 @@ export class CarrierService {
                 WHERE id = $5
                 RETURNING *
             `, [
-                carrierData.maxWeight ?? existingCarrier.maxWeight, 
-                carrierData.maxItems ?? existingCarrier.maxItems, 
+                carrierData.maxWeight ?? existingCarrier.maxWeight,
+                carrierData.maxItems ?? existingCarrier.maxItems,
                 carrierData.routeId ?? existingCarrier.routeId,
-                now, 
+                now,
                 id
             ]);
 
             return result.rows[0];
         } catch (error) {
+
             console.error(`Error al actualizar transportista con ID ${id}:`, error);
             throw error;
         }
