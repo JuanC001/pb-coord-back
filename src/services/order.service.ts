@@ -77,6 +77,38 @@ export class OrderService {
         }
     }
 
+    async updateOrder(id: string, orderData: Partial<Omit<Order, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Order | undefined> {
+
+        try {
+
+            const now = new Date();
+
+            const result = await pool.query(`
+        UPDATE orders
+        SET origin = $1, destination = $2, dimensions = $3, "updatedAt" = $4
+        WHERE id = $5
+        RETURNING *
+        `, [
+                orderData.origin,
+                orderData.destination,
+                orderData.dimensions,
+                now,
+                id
+            ]);
+
+            if (result.rowCount === 0) {
+                return undefined;
+            }
+
+            return result.rows[0];
+
+        } catch (error) {
+            console.error(`Error al actualizar orden ${id}:`, error);
+            throw error;
+        }
+
+    }
+
     async updateOrderStatus(id: string, orderStatus: OrderStatus): Promise<Order | undefined> {
         try {
             const now = new Date();
