@@ -1,16 +1,22 @@
 import { Router } from "express";
 import userController from "../controllers/user.controller";
+import { validateToken, hasRole } from "../middlewares/auth.middleware";
+import { UserRole } from "../utils/enums";
 
 const router = Router();
 
-router.get("/", userController.getUsers);
-router.get("/:id", userController.getUserById);
-router.get("/email/:email", userController.getUserByEmail);
+// Rutas públicas (si es necesario que alguna sea pública)
 
-router.put("/:id", userController.updateUser);
+// Rutas protegidas - requieren autenticación
+router.get("/", validateToken, hasRole(UserRole.ADMIN), userController.getUsers);
+router.get("/:id", validateToken, userController.getUserById);
+router.get("/email/:email", validateToken, hasRole(UserRole.ADMIN), userController.getUserByEmail);
 
-router.patch("/status/active/:id", userController.updateUserActiveStatus);
-router.patch("/status/email/:id", userController.updateUserEmailVerifiedStatus);
-router.patch("/status/role/:id", userController.updateUserRoleStatus);
+router.put("/:id", validateToken, userController.updateUser);
+
+// Rutas administrativas - requieren rol de ADMIN
+router.patch("/status/active/:id", validateToken, hasRole(UserRole.ADMIN), userController.updateUserActiveStatus);
+router.patch("/status/email/:id", validateToken, hasRole(UserRole.ADMIN), userController.updateUserEmailVerifiedStatus);
+router.patch("/status/role/:id", validateToken, hasRole(UserRole.ADMIN), userController.updateUserRoleStatus);
 
 export default router;
