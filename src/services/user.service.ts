@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import User from '../models/User';
+import Order from '../models/Order';
 import { UserRole } from '../utils/enums';
 import pool from '../config/database';
 
@@ -18,14 +19,28 @@ export class UserService {
         }
     }
 
-    async getUserById(id: string): Promise<User | undefined> {
+    async getUserById(id: string): Promise<User & { orders?: Order[] } | undefined> {
         try {
             const result = await pool.query(`
         SELECT * FROM users
         WHERE id = $1
       `, [id]);
 
-            return result.rows[0];
+            if (result.rows.length === 0) {
+                return undefined;
+            }
+            const user = result.rows[0];
+
+            const orderResult = await pool.query(`
+        SELECT * FROM orders
+        WHERE "userId" = $1
+        ORDER BY "createdAt" DESC
+      `, [id]);
+
+            return {
+                ...user,
+                orders: orderResult.rows
+            };
         } catch (error) {
             console.error(`Error al obtener usuario con ID ${id}:`, error);
             throw error;

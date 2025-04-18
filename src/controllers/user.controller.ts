@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import bcrypt from "bcryptjs";
 
 import User from "../models/User";
 import userService from "../services/user.service";
@@ -27,7 +26,9 @@ export class UserController {
                 return
             }
 
-            res.status(200).json(user);
+            const { password, ...userWithoutPassword } = user;
+            
+            res.status(200).json(userWithoutPassword);
             return
         } catch (error) {
             console.error(error);
