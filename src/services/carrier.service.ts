@@ -39,11 +39,11 @@ export class CarrierService {
 
             const result = await pool.query(`
                 INSERT INTO carriers (
-                    id, "userId", "maxWeight", "maxItems", "createdAt", "updatedAt"
+                    id, "userId", "maxWeight", "maxItems", "routeId", "createdAt", "updatedAt"
                 ) VALUES (
-                    $1, $2, $3, $4, $5, $6
+                    $1, $2, $3, $4, $5, $6, $7
                 ) RETURNING *
-            `, [id, carrierData.userId, carrierData.maxWeight, carrierData.maxItems, now, now]);
+            `, [id, carrierData.userId, carrierData.maxWeight, carrierData.maxItems, carrierData.routeId, now, now]);
 
             return result.rows[0];
         } catch (error) {
@@ -54,13 +54,25 @@ export class CarrierService {
     async updateCarrier(id: string, carrierData: Partial<Carrier>): Promise<Carrier | undefined> {
         try {
             const now = new Date();
+            
+            const existingCarrier = await this.getCarrierById(id);
+            
+            if (!existingCarrier) {
+                return undefined;
+            }
 
             const result = await pool.query(`
                 UPDATE carriers
-                SET "maxWeight" = $1, "maxItems" = $2, "updatedAt" = $3
-                WHERE id = $4
+                SET "maxWeight" = $1, "maxItems" = $2, "routeId" = $3, "updatedAt" = $4
+                WHERE id = $5
                 RETURNING *
-            `, [carrierData.maxWeight, carrierData.maxItems, now, id]);
+            `, [
+                carrierData.maxWeight ?? existingCarrier.maxWeight, 
+                carrierData.maxItems ?? existingCarrier.maxItems, 
+                carrierData.routeId ?? existingCarrier.routeId,
+                now, 
+                id
+            ]);
 
             return result.rows[0];
         } catch (error) {

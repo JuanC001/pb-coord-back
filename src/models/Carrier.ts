@@ -3,4 +3,5 @@ export interface Carrier {
     userId: string;
     maxWeight: number;
     maxItems: number;
+    routeId: string;
 }

@@ -7,6 +7,7 @@ import authRouter from './routes/auth.routes';
 import userRouter from './routes/user.routes';
 import carrierRouter from './routes/carrier.routes';
 import shipmentRouter from './routes/shipment.routes';
+import routeRouter from './routes/route.routes';
 
 export const app = express();
 
@@ -22,4 +23,5 @@ app.use('/api/users', userRouter);
 
 app.use('/api/carriers', carrierRouter);
 app.use('/api/shipments', shipmentRouter);
+app.use('/api/routes', routeRouter);
 

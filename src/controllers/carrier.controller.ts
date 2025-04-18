@@ -47,6 +47,11 @@ export class CarrierController {
                 return;
             }
 
+            if (!carrierData.routeId) {
+                res.status(400).json({ message: "Se requiere el ID de la ruta" });
+                return;
+            }
+
             if (carrierData.maxWeight <= 0) {
                 res.status(400).json({ message: "El peso máximo debe ser mayor a 0" });
                 return;
@@ -64,6 +69,14 @@ export class CarrierController {
             if (error instanceof DatabaseError) {
                 if (error.code === '23505') {
                     res.status(409).json({ message: "El transportista ya existe" });
+                    return;
+                }
+                if (error.code === '23503' && error.message.includes('routeId')) {
+                    res.status(400).json({ message: "La ruta especificada no existe" });
+                    return;
+                }
+                if (error.code === '23503' && error.message.includes('userId')) {
+                    res.status(400).json({ message: "El usuario especificado no existe" });
                     return;
                 }
             }
@@ -107,6 +120,12 @@ export class CarrierController {
             res.status(200).json(updatedCarrier);
         } catch (error) {
             console.error(error);
+            if (error instanceof DatabaseError) {
+                if (error.code === '23503' && error.message.includes('routeId')) {
+                    res.status(400).json({ message: "La ruta especificada no existe" });
+                    return;
+                }
+            }
             res.status(500).json({ message: "Error al actualizar el transportista" });
         }
     }
