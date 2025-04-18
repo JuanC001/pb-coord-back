@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import { OrderStatus } from '../utils/enums';
 import OrderController from '../controllers/order.controller';
 
 const router = Router();
