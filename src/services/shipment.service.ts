@@ -39,9 +39,24 @@ export class ShipmentService {
                 ORDER BY "createdAt" DESC
             `, [orderId]);
 
-            return result.rows;
+            return result.rows[0];
         } catch (error) {
             console.error(`Error al obtener envíos de la orden ${orderId}:`, error);
+            throw error;
+        }
+    }
+
+    async getShipmentsByTrackingNumber(trackingNumber: string): Promise<Shipment[]> {
+        try {
+            const result = await pool.query(`
+                SELECT * FROM shipments
+                WHERE "trackingNumber" = $1
+                ORDER BY "createdAt" DESC
+            `, [trackingNumber]);
+
+            return result.rows[0];
+        } catch (error) {
+            console.error(`Error al obtener envíos con número de seguimiento ${trackingNumber}:`, error);
             throw error;
         }
     }

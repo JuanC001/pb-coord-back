@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { Shipment } from "../models/Shipment";
 import { ShipmentStatus } from "../utils/enums";
+import { generateTrackingNumber } from "../utils/trackingNumber";
 
 import ShipmentService from "../services/shipment.service";
 
@@ -50,6 +51,23 @@ export class ShipmentController {
         }
     }
 
+    async getShipmentsByTrackingNumber(req: Request, res: Response): Promise<void> {
+        try {
+            const { trackingNumber } = req.params;
+
+            if (!trackingNumber) {
+                res.status(400).json({ message: "Se requiere el número de seguimiento" });
+                return;
+            }
+
+            const shipments = await ShipmentService.getShipmentsByTrackingNumber(trackingNumber);
+            res.status(200).json(shipments);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: "Error al obtener los envíos por número de seguimiento" });
+        }
+    }
+
     async createShipment(req: Request, res: Response): Promise<void> {
         try {
             const shipmentData = req.body as Omit<Shipment, 'id' | 'createdAt' | 'updatedAt'>;
@@ -65,14 +83,10 @@ export class ShipmentController {
             }
 
             if (!shipmentData.trackingNumber) {
-                res.status(400).json({ message: "Se requiere el número de seguimiento" });
-                return;
+                shipmentData.trackingNumber = generateTrackingNumber();
             }
 
-            if (!shipmentData.status || !Object.values(ShipmentStatus).includes(shipmentData.status)) {
-                res.status(400).json({ message: "Estado de envío inválido" });
-                return;
-            }
+            shipmentData.status = ShipmentStatus.PENDING;
 
             const newShipment = await ShipmentService.createShipment(shipmentData);
             res.status(201).json(newShipment);
