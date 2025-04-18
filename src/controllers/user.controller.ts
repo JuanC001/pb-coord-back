@@ -27,7 +27,9 @@ export class UserController {
                 return
             }
 
-            res.status(200).json(user);
+            const { password, ...userWithoutPassword } = user;
+            
+            res.status(200).json(userWithoutPassword);
             return
         } catch (error) {
             console.error(error);

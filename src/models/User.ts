@@ -17,8 +17,7 @@ interface User {
     country: string;
     postalCode: string;
   };
-  
-  // Rastreo de cuenta
+
   isActive: boolean;
   emailVerified: boolean;
   lastLogin?: Date;

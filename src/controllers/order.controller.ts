@@ -47,6 +47,16 @@ export class OrderController {
                 return
             }
 
+            if (orderData.dimensions && (orderData.dimensions.length <= 0 || orderData.dimensions.width <= 0 || orderData.dimensions.height <= 0 || orderData.dimensions.weight <= 0)) {
+                res.status(400).json({ message: "Las dimensiones deben ser mayores a 0" });
+                return
+            }
+
+            if (orderData.destination && (!orderData.destination.city || !orderData.destination.country || !orderData.destination.address || !orderData.destination.postalCode)) {
+                res.status(400).json({ message: "Faltan datos requeridos para la dirección de destino" });
+                return
+            }
+
             const newOrder = await orderService.createOrder(orderData);
             res.status(201).json(newOrder);
             return
