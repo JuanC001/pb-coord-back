@@ -4,6 +4,12 @@
 Este es un proyecto de una prueba para la postulación como Full Stack en coordinadora. Este es el proyecto de backend.
 Este proyecto utiliza Node JS y Express
 
+## Vídeo presentación:
+
+El video que se solicitó para la presentación se encuentra aqui:
+
+https://youtu.be/C3qhxdfq-mM
+
 # Preparativos
 
 A continuación se presentan los programas que ya deberías tener instalado para trabajar con este proyecto:
