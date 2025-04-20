@@ -1,0 +1,1364 @@
+openapi: 3.0.0
+info:
+  title: API Coordinadora
+  version: 1.0.0
+  description: Documentación de la API para la prueba técnica de Coordinadora Full Stack
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    # Definición de Address (para dirección)
+    Address:
+      type: object
+      properties:
+        address:
+          type: string
+          description: Dirección completa
+        city:
+          type: string
+          description: Ciudad
+        country:
+          type: string
+          description: País
+        postalCode:
+          type: string
+          description: Código postal
+
+    # Definición de User
+    User:
+      type: object
+      required:
+        - id
+        - email
+        - password
+        - firstName
+        - lastName
+        - documentType
+        - documentNumber
+        - phoneNumber
+        - role
+        - isActive
+        - emailVerified
+      properties:
+        id:
+          type: string
+          description: ID único del usuario (UUID)
+        email:
+          type: string
+          format: email
+          description: Correo electrónico del usuario
+        password:
+          type: string
+          description: Contraseña encriptada
+        firstName:
+          type: string
+          description: Nombre del usuario
+        lastName:
+          type: string
+          description: Apellido del usuario
+        documentType:
+          type: string
+          description: Tipo de documento (CC, NIT, etc.)
+        documentNumber:
+          type: string
+          description: Número de documento
+        phoneNumber:
+          type: string
+          description: Número de teléfono
+        role:
+          type: string
+          enum: [customer, admin, courrier]
+          description: Rol del usuario
+        defaultAddress:
+          $ref: "#/components/schemas/Address"
+        isActive:
+          type: boolean
+          description: Indica si el usuario está activo
+        emailVerified:
+          type: boolean
+          description: Indica si el correo ha sido verificado
+        lastLogin:
+          type: string
+          format: date-time
+          description: Fecha del último inicio de sesión
+        createdAt:
+          type: string
+          format: date-time
+          description: Fecha de creación
+        updatedAt:
+          type: string
+          format: date-time
+          description: Fecha de última actualización
+
+    # Definición de UserResponse (sin password)
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        documentType:
+          type: string
+        documentNumber:
+          type: string
+        phoneNumber:
+          type: string
+        role:
+          type: string
+          enum: [customer, admin, courrier]
+        defaultAddress:
+          $ref: "#/components/schemas/Address"
+        isActive:
+          type: boolean
+        emailVerified:
+          type: boolean
+        lastLogin:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    # Definición de Carrier
+    Carrier:
+      type: object
+      required:
+        - id
+        - userId
+        - routeId
+        - maxWeight
+        - maxItems
+      properties:
+        id:
+          type: string
+          description: ID único del transportador
+        userId:
+          type: string
+          description: ID del usuario asociado al transportador
+        maxWeight:
+          type: number
+          description: Peso máximo que puede transportar en kg
+        maxItems:
+          type: number
+          description: Número máximo de items que puede transportar
+        routeId:
+          type: string
+          description: ID de la ruta asignada al transportador (opcional)
+
+    # Definición de Order
+    Order:
+      type: object
+      required:
+        - id
+        - userId
+        - origin
+        - destination
+        - orderStatus
+        - dimensions
+        - createdAt
+      properties:
+        id:
+          type: string
+          description: ID único del pedido
+        userId:
+          type: string
+          description: ID del usuario que realizó el pedido
+        origin:
+          type: string
+          description: Origen de la orden (dirección)
+        destination:
+          type: object
+          properties:
+            city:
+              type: string
+              description: Ciudad de destino
+            country:
+              type: string
+              description: País de destino
+            address:
+              type: string
+              description: Dirección de destino
+            postalCode:
+              type: string
+              description: Código postal de destino
+        orderStatus:
+          type: string
+          enum: [pending, accepted]
+          description: Estado de la orden
+        dimensions:
+          type: object
+          properties:
+            length:
+              type: number
+              description: Longitud del paquete en cm
+            width:
+              type: number
+              description: Ancho del paquete en cm
+            height:
+              type: number
+              description: Altura del paquete en cm
+            weight:
+              type: number
+              description: Peso del paquete en kg
+        createdAt:
+          type: string
+          format: date-time
+          description: Fecha de creación
+        updatedAt:
+          type: string
+          format: date-time
+          description: Fecha de última actualización
+
+    # Definición de Route
+    Route:
+      type: object
+      required:
+        - id
+        - name
+        - origin
+        - destination
+      properties:
+        id:
+          type: string
+          description: ID único de la ruta
+        name:
+          type: string
+          description: Nombre de la ruta
+        origin:
+          type: string
+          description: Punto de origen de la ruta
+        destination:
+          type: string
+          description: Punto de destino de la ruta
+
+    # Definición de Shipment
+    Shipment:
+      type: object
+      required:
+        - id
+        - orderId
+        - carrierId
+        - status
+        - trackingNumber
+      properties:
+        id:
+          type: string
+          description: ID único del envío
+        orderId:
+          type: string
+          description: ID de la orden asociada al envío
+        carrierId:
+          type: string
+          description: ID del transportador asignado
+        status:
+          type: string
+          enum: [pending, in_transit, delivered]
+          description: Estado del envío
+        trackingNumber:
+          type: string
+          description: Número de seguimiento
+        createdAt:
+          type: string
+          format: date-time
+          description: Fecha de creación
+        updatedAt:
+          type: string
+          format: date-time
+          description: Fecha de última actualización
+
+    # Definiciones adicionales para las operaciones
+    LoginInput:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: Email del usuario
+        password:
+          type: string
+          description: Contraseña del usuario
+
+    LoginResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/UserResponse"
+        token:
+          type: string
+          description: JWT token para autenticación
+
+    RegisterInput:
+      type: object
+      required:
+        - email
+        - password
+        - firstName
+        - lastName
+        - documentType
+        - documentNumber
+        - phoneNumber
+      properties:
+        email:
+          type: string
+          format: email
+          description: Email del usuario
+        password:
+          type: string
+          description: Contraseña del usuario
+        firstName:
+          type: string
+          description: Nombre del usuario
+        lastName:
+          type: string
+          description: Apellido del usuario
+        documentType:
+          type: string
+          description: Tipo de documento (CC, NIT, etc.)
+        documentNumber:
+          type: string
+          description: Número de documento
+        phoneNumber:
+          type: string
+          description: Número de teléfono
+        defaultAddress:
+          $ref: "#/components/schemas/Address"
+
+    UserStatusUpdate:
+      type: object
+      properties:
+        isActive:
+          type: boolean
+          description: Estado activo del usuario
+
+    UserEmailVerifiedUpdate:
+      type: object
+      properties:
+        emailVerified:
+          type: boolean
+          description: Estado de verificación de email
+
+    UserRoleUpdate:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [customer, admin, courrier]
+          description: Nuevo rol del usuario
+
+    OrderStatusUpdate:
+      type: object
+      properties:
+        orderStatus:
+          type: string
+          enum: [pending, accepted]
+          description: Nuevo estado de la orden
+
+# Etiquetas para agrupar endpoints
+tags:
+  - name: Autenticación
+    description: Endpoints para autenticación de usuarios
+  - name: Usuarios
+    description: Endpoints para gestión de usuario
+  - name: Transportadores
+    description: API para gestión de transportadores
+  - name: Órdenes
+    description: API para gestión de órdenes
+  - name: Envíos
+    description: API para gestión de envíos
+  - name: Rutas
+    description: API para gestión de rutas
+
+# Definición de paths (endpoints)
+paths:
+  # Rutas de Autenticación
+  /api/auth/login:
+    post:
+      summary: Inicia sesión de usuario
+      tags: [Autenticación]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        200:
+          description: Inicio de sesión exitoso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        400:
+          description: Datos inválidos
+        401:
+          description: Credenciales incorrectas
+        500:
+          description: Error del servidor
+
+  /api/auth/register:
+    post:
+      summary: Registra un nuevo usuario
+      tags: [Autenticación]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterInput"
+      responses:
+        201:
+          description: Usuario registrado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        400:
+          description: Datos inválidos o usuario ya existe
+        500:
+          description: Error del servidor
+
+  /api/auth/renew:
+    post:
+      summary: Renueva el token de autenticación
+      tags: [Autenticación]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Token renovado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        401:
+          description: No autorizado
+        500:
+          description: Error del servidor
+
+  # Rutas de Usuarios
+  /api/users:
+    get:
+      summary: Obtiene la lista de usuarios
+      tags: [Usuarios]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Lista de usuarios obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserResponse"
+        401:
+          description: No autorizado
+        403:
+          description: Acceso prohibido, rol insuficiente
+        500:
+          description: Error del servidor
+
+  /api/users/{id}:
+    get:
+      summary: Obtiene un usuario por ID
+      tags: [Usuarios]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID del usuario
+      responses:
+        200:
+          description: Devuelve el usuario completo (sin contraseña)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        401:
+          description: No autorizado
+        404:
+          description: Usuario no encontrado
+        500:
+          description: Error del servidor
+
+    put:
+      summary: Actualiza la información de un usuario
+      tags: [Usuarios]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID del usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserResponse"
+      responses:
+        200:
+          description: Usuario actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        401:
+          description: No autorizado
+        404:
+          description: Usuario no encontrado
+        500:
+          description: Error al obtener el usuario
+
+  /api/users/email/{email}:
+    get:
+      summary: Obtiene un usuario por email
+      tags: [Usuarios]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: email
+          schema:
+            type: string
+          required: true
+          description: Email del usuario
+      responses:
+        200:
+          description: Devuelve un usuario
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        401:
+          description: No autorizado
+        403:
+          description: Acceso prohibido, rol insuficiente
+        404:
+          description: Usuario no encontrado
+        500:
+          description: Error del servidor
+
+  /api/users/status/active/{id}:
+    patch:
+      summary: Actualiza el estado activo/inactivo de un usuario
+      tags: [Usuarios]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID del usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserStatusUpdate"
+      responses:
+        200:
+          description: Estado del usuario actualizado exitosamente
+        401:
+          description: No autorizado
+        403:
+          description: Acceso prohibido, rol insuficiente
+        404:
+          description: Usuario no encontrado
+        500:
+          description: Error del servidor
+
+  /api/users/status/email/{id}:
+    patch:
+      summary: Actualiza el estado de verificación de email de un usuario
+      tags: [Usuarios]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID del usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserEmailVerifiedUpdate"
+      responses:
+        200:
+          description: Estado de verificación actualizado exitosamente
+        401:
+          description: No autorizado
+        403:
+          description: Acceso prohibido, rol insuficiente
+        404:
+          description: Usuario no encontrado
+        500:
+          description: Error del servidor
+
+  /api/users/status/role/{id}:
+    patch:
+      summary: Actualiza el rol de un usuario
+      tags: [Usuarios]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID del usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserRoleUpdate"
+      responses:
+        200:
+          description: Rol del usuario actualizado exitosamente
+        401:
+          description: No autorizado
+        403:
+          description: Acceso prohibido, rol insuficiente
+        404:
+          description: Usuario no encontrado
+        500:
+          description: Error del servidor
+
+  # Rutas de Transportadores (Carriers)
+  /api/carriers:
+    get:
+      summary: Obtiene la lista de transportadores
+      tags: [Transportadores]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Lista de transportadores obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Carrier"
+        401:
+          description: No autorizado
+        500:
+          description: Error del servidor
+
+    post:
+      summary: Crea un nuevo transportador
+      tags: [Transportadores]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+                - maxWeight
+                - maxItems
+                - routeId
+              properties:
+                userId:
+                  type: string
+                maxWeight:
+                  type: number
+                maxItems:
+                  type: number
+                routeId:
+                  type: string
+      responses:
+        201:
+          description: Transportador creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Carrier"
+        400:
+          description: Datos inválidos
+        401:
+          description: No autorizado
+        500:
+          description: Error del servidor
+
+  /api/carriers/{id}:
+    get:
+      summary: Obtiene un transportador por ID
+      tags: [Transportadores]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID del transportador
+      responses:
+        200:
+          description: Transportador encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Carrier"
+        401:
+          description: No autorizado
+        404:
+          description: Transportador no encontrado
+        500:
+          description: Error del servidor
+
+    put:
+      summary: Actualiza un transportador
+      tags: [Transportadores]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID del transportador
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Carrier"
+      responses:
+        200:
+          description: Transportador actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Carrier"
+        401:
+          description: No autorizado
+        404:
+          description: Transportador no encontrado
+        500:
+          description: Error del servidor
+
+    delete:
+      summary: Elimina un transportador
+      tags: [Transportadores]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID del transportador
+      responses:
+        200:
+          description: Transportador eliminado exitosamente
+        401:
+          description: No autorizado
+        404:
+          description: Transportador no encontrado
+        500:
+          description: Error del servidor
+
+  # Rutas de Órdenes
+  /api/orders:
+    get:
+      summary: Obtiene la lista de órdenes
+      tags: [Órdenes]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Lista de órdenes obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+        401:
+          description: No autorizado
+        403:
+          description: Acceso prohibido, rol insuficiente
+        500:
+          description: Error del servidor
+
+    post:
+      summary: Crea una nueva orden
+      tags: [Órdenes]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - origin
+                - destination
+                - dimensions
+              properties:
+                origin:
+                  type: string
+                destination:
+                  type: object
+                  properties:
+                    city:
+                      type: string
+                    country:
+                      type: string
+                    address:
+                      type: string
+                    postalCode:
+                      type: string
+                dimensions:
+                  type: object
+                  properties:
+                    length:
+                      type: number
+                    width:
+                      type: number
+                    height:
+                      type: number
+                    weight:
+                      type: number
+      responses:
+        201:
+          description: Orden creada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        400:
+          description: Datos inválidos
+        401:
+          description: No autorizado
+        403:
+          description: Acceso prohibido, rol insuficiente
+        500:
+          description: Error del servidor
+
+  /api/orders/{id}:
+    get:
+      summary: Obtiene una orden por ID
+      tags: [Órdenes]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID de la orden
+      responses:
+        200:
+          description: Orden encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        401:
+          description: No autorizado
+        404:
+          description: Orden no encontrada
+        500:
+          description: Error del servidor
+
+    put:
+      summary: Actualiza una orden
+      tags: [Órdenes]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID de la orden
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Order"
+      responses:
+        200:
+          description: Orden actualizada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        400:
+          description: Datos inválidos
+        401:
+          description: No autorizado
+        403:
+          description: Acceso prohibido, rol insuficiente
+        404:
+          description: Orden no encontrada
+        500:
+          description: Error del servidor
+
+    delete:
+      summary: Elimina una orden
+      tags: [Órdenes]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID de la orden
+      responses:
+        200:
+          description: Orden eliminada exitosamente
+        401:
+          description: No autorizado
+        403:
+          description: Acceso prohibido, rol insuficiente
+        404:
+          description: Orden no encontrada
+        500:
+          description: Error del servidor
+
+  /api/orders/user/{userId}:
+    get:
+      summary: Obtiene las órdenes de un usuario
+      tags: [Órdenes]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: string
+          required: true
+          description: ID del usuario
+      responses:
+        200:
+          description: Órdenes del usuario obtenidas exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+        401:
+          description: No autorizado
+        404:
+          description: Usuario no encontrado
+        500:
+          description: Error del servidor
+
+  /api/orders/status/{id}:
+    patch:
+      summary: Actualiza el estado de una orden
+      tags: [Órdenes]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID de la orden
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderStatusUpdate"
+      responses:
+        200:
+          description: Estado de la orden actualizado exitosamente
+        401:
+          description: No autorizado
+        403:
+          description: Acceso prohibido, rol insuficiente
+        404:
+          description: Orden no encontrada
+        500:
+          description: Error del servidor
+
+  # Rutas de Rutas (Routes)
+  /api/routes:
+    get:
+      summary: Obtiene la lista de rutas
+      tags: [Rutas]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Lista de rutas obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Route"
+        401:
+          description: No autorizado
+        500:
+          description: Error del servidor
+
+    post:
+      summary: Crea una nueva ruta
+      tags: [Rutas]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - origin
+                - destination
+              properties:
+                name:
+                  type: string
+                origin:
+                  type: string
+                destination:
+                  type: string
+      responses:
+        201:
+          description: Ruta creada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Route"
+        400:
+          description: Datos inválidos
+        401:
+          description: No autorizado
+        500:
+          description: Error del servidor
+
+  /api/routes/{id}:
+    get:
+      summary: Obtiene una ruta por ID
+      tags: [Rutas]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID de la ruta
+      responses:
+        200:
+          description: Ruta encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Route"
+        401:
+          description: No autorizado
+        404:
+          description: Ruta no encontrada
+        500:
+          description: Error del servidor
+
+    put:
+      summary: Actualiza una ruta
+      tags: [Rutas]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID de la ruta
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Route"
+      responses:
+        200:
+          description: Ruta actualizada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Route"
+        401:
+          description: No autorizado
+        404:
+          description: Ruta no encontrada
+        500:
+          description: Error del servidor
+
+    delete:
+      summary: Elimina una ruta
+      tags: [Rutas]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID de la ruta
+      responses:
+        200:
+          description: Ruta eliminada exitosamente
+        401:
+          description: No autorizado
+        404:
+          description: Ruta no encontrada
+        500:
+          description: Error del servidor
+
+  # Rutas de Envíos (Shipments)
+  /api/shipments:
+    get:
+      summary: Obtiene la lista de envíos
+      tags: [Envíos]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Lista de envíos obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Shipment"
+        401:
+          description: No autorizado
+        403:
+          description: Acceso prohibido, rol insuficiente
+        500:
+          description: Error del servidor
+
+    post:
+      summary: Crea un nuevo envío
+      tags: [Envíos]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - orderId
+                - carrierId
+              properties:
+                orderId:
+                  type: string
+                  description: ID de la orden a enviar
+                carrierId:
+                  type: string
+                  description: ID del transportador
+      responses:
+        201:
+          description: Envío creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shipment"
+        400:
+          description: Datos inválidos
+        401:
+          description: No autorizado
+        403:
+          description: Acceso prohibido, rol insuficiente
+        404:
+          description: Orden o transportador no encontrado
+        500:
+          description: Error del servidor
+
+  /api/shipments/{id}:
+    get:
+      summary: Obtiene un envío por ID
+      tags: [Envíos]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID del envío
+      responses:
+        200:
+          description: Envío encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shipment"
+        401:
+          description: No autorizado
+        403:
+          description: Acceso prohibido, rol insuficiente
+        404:
+          description: Envío no encontrado
+        500:
+          description: Error del servidor
+
+    put:
+      summary: Actualiza un envío
+      tags: [Envíos]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID del envío
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Shipment"
+      responses:
+        200:
+          description: Envío actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shipment"
+        401:
+          description: No autorizado
+        403:
+          description: Acceso prohibido, rol insuficiente
+        404:
+          description: Envío no encontrado
+        500:
+          description: Error del servidor
+
+    delete:
+      summary: Elimina un envío
+      tags: [Envíos]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID del envío
+      responses:
+        200:
+          description: Envío eliminado exitosamente
+        401:
+          description: No autorizado
+        403:
+          description: Acceso prohibido, rol insuficiente
+        404:
+          description: Envío no encontrado
+        500:
+          description: Error del servidor
+
+  /api/shipments/tracking/{trackingNumber}:
+    get:
+      summary: Rastrea un envío por número de seguimiento
+      tags: [Envíos]
+      parameters:
+        - in: path
+          name: trackingNumber
+          schema:
+            type: string
+          required: true
+          description: Número de seguimiento
+      responses:
+        200:
+          description: Información de seguimiento obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shipment"
+        404:
+          description: Envío no encontrado
+        500:
+          description: Error del servidor
+
+  /api/shipments/order/{orderId}:
+    get:
+      summary: Obtiene los envíos por ID de orden
+      tags: [Envíos]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: orderId
+          schema:
+            type: string
+          required: true
+          description: ID de la orden
+      responses:
+        200:
+          description: Envíos relacionados con la orden obtenidos exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Shipment"
+        401:
+          description: No autorizado
+        403:
+          description: Acceso prohibido, rol insuficiente
+        404:
+          description: Orden no encontrada
+        500:
+          description: Error del servidor

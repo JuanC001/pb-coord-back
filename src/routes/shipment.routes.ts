@@ -13,4 +13,6 @@ router.post('/', validateToken, hasRole(UserRole.ADMIN), shipmentController.crea
 router.put('/:id', validateToken, hasRole(UserRole.ADMIN), shipmentController.updateShipment);
 router.delete('/:id', validateToken, hasRole(UserRole.ADMIN), shipmentController.deleteShipment);
 
+router.patch('/status/:id', validateToken, hasRole(UserRole.ADMIN, UserRole.COURRIER), shipmentController.updateShipmentStatus);
+
 export default router;

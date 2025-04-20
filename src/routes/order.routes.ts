@@ -7,8 +7,8 @@ const router = Router();
 
 router.get('/', validateToken, hasRole(UserRole.ADMIN), OrderController.getOrders);
 
-router.get('/:id', validateToken, OrderController.getOrderById);
-router.get('/user/:userId', validateToken, OrderController.getOrdersByUserId);
+router.get('/:id', validateToken, hasRole(UserRole.CUSTOMER, UserRole.ADMIN), OrderController.getOrderById);
+router.get('/user/:userId', validateToken, hasRole(UserRole.CUSTOMER, UserRole.ADMIN), OrderController.getOrdersByUserId);
 
 router.put('/:id', validateToken, hasRole(UserRole.CUSTOMER, UserRole.ADMIN), OrderController.updateOrder);
 router.post('/', validateToken, hasRole(UserRole.CUSTOMER, UserRole.ADMIN), OrderController.createOrder);

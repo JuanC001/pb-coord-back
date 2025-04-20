@@ -8,6 +8,7 @@ import userRouter from './routes/user.routes';
 import carrierRouter from './routes/carrier.routes';
 import shipmentRouter from './routes/shipment.routes';
 import routeRouter from './routes/route.routes';
+import swaggerDocs from './config/swagger';
 
 export const app = express();
 
