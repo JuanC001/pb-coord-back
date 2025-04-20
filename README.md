@@ -2,7 +2,7 @@
 
 ¡Hola! 
 Este es un proyecto de una prueba para la postulación como Full Stack en coordinadora. Este es el proyecto de backend.
-Este proyecto utiliza Node JS y Express
+Este proyecto utiliza Node JS y Express. Se hace entrega el 19/04/2025 antes de las 11:59 P.M para cumplir con la fecha limite que era hasta el domingo 20 a las 12:00 A.M
 
 ## Vídeo presentación:
 
