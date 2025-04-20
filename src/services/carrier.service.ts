@@ -9,8 +9,8 @@ export class CarrierService {
         try {
 
             const result = await pool.query(`
-                SELECT * FROM carriers
-                ORDER BY "createdAt" DESC
+               SELECT ca.*, r."name" as "routeName" FROM carriers ca
+         LEFT JOIN public.routes r on ca."routeId" = r.id
             `);
             return result.rows;
 

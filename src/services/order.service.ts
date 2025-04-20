@@ -35,9 +35,9 @@ export class OrderService {
     async getOrdersByUserId(userId: string): Promise<Order[]> {
         try {
             const result = await pool.query(`
-        SELECT * FROM orders
-        WHERE "userId" = $1
-        ORDER BY "createdAt" DESC
+        SELECT   o.*,  s."trackingNumber" FROM   public.orders o 
+        LEFT JOIN   public.shipments s ON o.id = s."orderId"
+        WHERE o."userId" = $1 ORDER BY o."createdAt" ASC
       `, [userId]);
 
             return result.rows;

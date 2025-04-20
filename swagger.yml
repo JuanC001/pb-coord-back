@@ -138,6 +138,7 @@ components:
       required:
         - id
         - userId
+        - routeId
         - maxWeight
         - maxItems
       properties:
@@ -690,6 +691,7 @@ paths:
                 - userId
                 - maxWeight
                 - maxItems
+                - routeId
               properties:
                 userId:
                   type: string
@@ -697,6 +699,8 @@ paths:
                   type: number
                 maxItems:
                   type: number
+                routeId:
+                  type: string
       responses:
         201:
           description: Transportador creado exitosamente

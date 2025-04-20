@@ -49,9 +49,12 @@ export class ShipmentService {
     async getShipmentsByTrackingNumber(trackingNumber: string): Promise<Shipment[]> {
         try {
             const result = await pool.query(`
-                SELECT * FROM shipments
+                SELECT s.*, o.destination, o.dimensions, o.origin, r."name" as "routeName" FROM shipments s
+LEFT JOIN public.orders o on s."orderId" = o.id
+LEFT JOIN public.carriers ca on s."carrierId" = ca.id
+LEFT JOIN public.routes r on ca."routeId" = r.id
                 WHERE "trackingNumber" = $1
-                ORDER BY "createdAt" DESC
+                ORDER BY s."createdAt" DESC
             `, [trackingNumber]);
 
             return result.rows[0];
